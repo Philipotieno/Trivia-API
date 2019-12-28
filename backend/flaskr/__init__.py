@@ -71,6 +71,31 @@ def create_app(test_config=None):
         'current_category': None
         })
     
+    @app.route('/questions/<int:question_id>', methods=['DELETE'])
+    def remove_questions(question_id):
+        try:
+            question = Question.query.filter(Question.id == question_id).one_or_none()
+            if question is None:
+                abort(404)
+                
+            question.delete()
+            questions = Question.query.order_by(Question.id).all()
+            current_quizez = paginate_questions(request, questions)
+            
+            data = Category.query.order_by(Category.id).all()
+            categories = {}
+            for category in data:
+                categories[category.id] = category.type
+                
+            return jsonify({
+                'questions': current_quizez,
+                'total_questions': Question.query.count(),
+                'categories': categories,
+                'current_category': None
+            })
+                
+        except:
+            abort(400)
             
     @app.errorhandler(404)
     def not_found(error):
