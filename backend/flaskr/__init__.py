@@ -11,6 +11,15 @@ from models import setup_db, Question, Category
 
 QUESTIONS_PER_PAGE = 10
 
+def paginate_questions(request, questions):
+    page = request.args.get('page', 1, type=int)
+    start = (page -1) * QUESTIONS_PER_PAGE
+    end = start + QUESTIONS_PER_PAGE
+    
+    quizez = [quiz.format() for quiz in questions]
+    current_quizes = quizez[start:end]
+    
+    return current_quizes
 
 def create_app(test_config=None):
     # create and configure the app
@@ -35,38 +44,51 @@ def create_app(test_config=None):
     @app.route('/categories')
     def get_all_categories():
         categories = Category.query.all()
-        # categories = Category.query.order_by(Category.id).all()
-        # formated = [categories.format() for categories in categories]
-        formated = list( map(lambda x: x.format(), categories))
+        formated = [categories.format() for categories in categories]
 
         return jsonify({
             'success': True,
             'status code': 200,
             'categories': formated
         })
+    @app.route('/questions')
+    def questions():
+        questions = Question.query.order_by(Question.id).all()
+        current_quizez =paginate_questions(request, questions)
 
+        data = Category.query.order_by(Category.id).all()
+        categories = {}
+        for category in data:
+            categories[category.id] = category.type
+
+        if len(current_quizez) == 0:
+            abort(404)
+            
+        return jsonify({
+        'questions': current_quizez,
+        'total_questions': Question.query.count(),
+        'categories': categories,
+        'current_category': None
+        })
+    
+            
+    @app.errorhandler(404)
+    def not_found(error):
+        return jsonify({
+            'Success': False,
+            'Status code': 404,
+            'Message': 'Resource Not Found'
+            }), 400
+        
+    @app.errorhandler(400)
+    def uprocessable(error):
+        return jsonify({
+            'Success': False,
+            'Status code': 400,
+            'Message': 'Cannot be processed'
+            }), 400
+        
     return app
-
-  #   '''
-  # @TODO:
-  # Create an endpoint to handle GET requests for questions,
-  # including pagination (every 10 questions).
-  # This endpoint should return a list of questions,
-  # number of total questions, current category, categories.
-
-  # TEST: At this point, when you start the application
-  # you should see questions and categories generated,
-  # ten questions per page and pagination at the bottom of the screen for three pages.
-  # Clicking on the page numbers should update the questions.
-  # '''
-
-  #   '''
-  # @TODO:
-  # Create an endpoint to DELETE question using a question ID.
-
-  # TEST: When you click the trash icon next to a question, the question will be removed.
-  # This removal will persist in the database and when you refresh the page.
-  # '''
 
   #   '''
   # @TODO:
