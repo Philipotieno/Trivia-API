@@ -16,10 +16,10 @@ def paginate_questions(request, questions):
     start = (page -1) * QUESTIONS_PER_PAGE
     end = start + QUESTIONS_PER_PAGE
     
-    quizez = [quiz.format() for quiz in questions]
-    current_quizes = quizez[start:end]
+    quizzes = [quiz.format() for quiz in questions]
+    current_quizzes = quizzes[start:end]
     
-    return current_quizes
+    return current_quizzes
 
 def create_app(test_config=None):
     # create and configure the app
@@ -43,29 +43,32 @@ def create_app(test_config=None):
 
     @app.route('/categories')
     def get_all_categories():
-        categories = Category.query.all()
-        formated = [categories.format() for categories in categories]
-
+        
+        data = Category.query.order_by(Category.id).all()
+        categories = {}
+        for category in data:
+            categories[category.id] = category.type
+        
         return jsonify({
             'success': True,
             'status code': 200,
-            'categories': formated
+            'categories': categories
         })
     @app.route('/questions')
     def questions():
         questions = Question.query.order_by(Question.id).all()
-        current_quizez =paginate_questions(request, questions)
+        current_quizzes =paginate_questions(request, questions)
 
         data = Category.query.order_by(Category.id).all()
         categories = {}
         for category in data:
             categories[category.id] = category.type
 
-        if len(current_quizez) == 0:
+        if len(current_quizzes) == 0:
             abort(404)
             
         return jsonify({
-        'questions': current_quizez,
+        'questions': current_quizzes,
         'total_questions': Question.query.count(),
         'categories': categories,
         'current_category': None
@@ -80,7 +83,7 @@ def create_app(test_config=None):
                 
             question.delete()
             questions = Question.query.order_by(Question.id).all()
-            current_quizez = paginate_questions(request, questions)
+            current_quizzes = paginate_questions(request, questions)
             
             data = Category.query.order_by(Category.id).all()
             categories = {}
@@ -88,7 +91,7 @@ def create_app(test_config=None):
                 categories[category.id] = category.type
                 
             return jsonify({
-                'questions': current_quizez,
+                'questions': current_quizzes,
                 'total_questions': Question.query.count(),
                 'categories': categories,
                 'current_category': None
@@ -97,55 +100,68 @@ def create_app(test_config=None):
         except:
             abort(400)
             
-    @app.errorhandler(404)
-    def not_found(error):
-        return jsonify({
-            'Success': False,
-            'Status code': 404,
-            'Message': 'Resource Not Found'
-            }), 400
+            
+    @app.route('/questions', methods=['POST'])
+    def create_question():
+        data = request.get_json()
         
-    @app.errorhandler(400)
-    def uprocessable(error):
-        return jsonify({
-            'Success': False,
-            'Status code': 400,
-            'Message': 'Cannot be processed'
-            }), 400
+        question = data.get('question', None)
+        answer = data.get('answer', None)
+        category = data.get('category', None)
+        difficulty= data.get('difficulty', None)
+        searchTerm = data.get('searchTerm', None)
+            
+        try:
+            if searchTerm:
+                questions = Question.query.order_by(Question.id).filter(Question.question.ilike('%{}%'.format(searchTerm)))
+                current_quizzes = paginate_questions(request, questions)
+                
+                return jsonify({
+                    'questions': current_quizzes,
+                    'total_questions': len(questions.all()),
+                    'current_category': None
+                })
+                
+            else:
+                question = Question(question=question, answer=answer, category=category, difficulty=difficulty)
+                question.insert()
+            
+                questions = Question.query.order_by(Question.id).all()
+                current_quizzes = paginate_questions(request, questions)
+
+            return jsonify({
+                'created' : question.id,
+                'questions': current_quizzes,
+                'total_questions': Question.query.count(),
+                'current_category': None
+            })
+        except:
+            abort(422)
+            
+    @app.route('/categories/<int:id>/questions')
+    def get_single_category_questions(id):
+        try:
+            questions = Question.query.filter(Question.category == id).all()
+            current_quizzes = paginate_questions(request, questions)
         
-    return app
-
-  #   '''
-  # @TODO:
-  # Create an endpoint to POST a new question,
-  # which will require the question and answer text,
-  # category, and difficulty score.
-
-  # TEST: When you submit a question on the "Add" tab,
-  # the form will clear and the question will appear at the end of the last page
-  # of the questions list in the "List" tab.
-  # '''
-
-  #   '''
-  # @TODO:
-  # Create a POST endpoint to get questions based on a search term.
-  # It should return any questions for whom the search term
-  # is a substring of the question.
-
-  # TEST: Search by any phrase. The questions list will update to include
-  # only question that include that string within their question.
-  # Try using the word "title" to start.
-  # '''
-
-  #   '''
-  # @TODO:
-  # Create a GET endpoint to get questions based on category.
-
-  # TEST: In the "List" tab / main screen, clicking on one of the
-  # categories in the left column will cause only questions of that
-  # category to be shown.
-  # '''
-
+            if questions is None:
+                abort(404)
+                
+            else:
+                return jsonify({
+                    'questions': current_quizzes,
+                    'total_questions': len(current_quizzes),
+                    'current_category': id
+                })
+                
+        except:
+            abort(400)
+            
+    @app.route('/quizzez', methods=['POST'])
+    def play_game():
+        return jsonify({
+            'Message': "Are you able to hack this"
+        })
   #   '''
   # @TODO:
   # Create a POST endpoint to get questions to play the quiz.
@@ -158,8 +174,36 @@ def create_app(test_config=None):
   # and shown whether they were correct or not.
   # '''
 
-  #   '''
-  # @TODO:
-  # Create error handlers for all expected errors
-  # including 404 and 422.
-  # '''
+    @app.errorhandler(400)
+    def bad_request(error):
+        return jsonify({
+            'Success': False,
+            'Error': 400,
+            'Message': 'bad request'
+            }), 400
+        
+    @app.errorhandler(404)
+    def not_found(error):
+        return jsonify({
+            'Success': False,
+            'Error': 404,
+            'Message': 'Resource Not Found'
+            }), 404
+        
+    @app.errorhandler(422)
+    def uprocessable(error):
+        return jsonify({
+            'Success': False,
+            'Error': 422,
+            'Message': 'Cannot be processed'
+            }), 422
+        
+    @app.errorhandler(405)
+    def not_allowed(error):
+        return jsonify({
+            'Success': False,
+            'Status code': 404,
+            'Message': 'Method Not allowed'
+            }), 405
+        
+    return app
