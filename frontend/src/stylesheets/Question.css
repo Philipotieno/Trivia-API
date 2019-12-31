@@ -22,6 +22,8 @@
   border: 2px black solid;
   text-align: left;
   margin: 7px;
+  border-radius: 40px;
+  background-color: rgb(157, 172, 221);
 }
 
 .Question-status {
@@ -51,6 +53,7 @@
   color: white;
   padding: 3px 5px;
   margin-left: 0px !important;
+  border-radius: 8px;
 }
 
 span.page-num {
@@ -67,7 +70,8 @@ span.page-num.active {
 }
 
 img.category {
-  width: 30px;
+  margin-top: 20px;
+  width: 20px;
 }
 
 img.delete {
