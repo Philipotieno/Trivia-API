@@ -44,15 +44,31 @@ From within the `backend` directory first ensure you are working using your crea
 To run the server, execute:
 
 ```bash
+- Then add a .env file as shown in the following sample
+  ```
+  - `export DATABASE_NAME=trivia`
+  - `export TEST_DB=trivia_test`
+  - `export DATABASE_USER=your user name`
+  - `export DATABASE_PASSWORD=your user password`
+  - `export HOST=localhost:5432`
+
+
+  - `export DATABASE_USER=mitch`
+  -  `export DATABASE_PASSWORD=mufasa2019`
+  - `export HOST=localhost:5432`
+
+  - `export FLASK_ENV=development`
+  - `export FLASK_APP=flaskr`
+  - `source venv/bin/activate`
+  ```
+
 $ virtualenv -p python3 venv
-$ source venv/bin/activate
 $ pip install -r requirements.txt
-$ export FLASK_APP=flaskr
-$ export FLASK_ENV=development
+$ source .env
 $ flask run
 ```
 - `virtualenv -p python3 venv` will create the virtual environment
-- `source venv/bin/activate` will create the virtual environment
+- `source .env` will activate the virtual environment and export the envirnment variables needed
 - `pip install -r requirements.txt` will install python packages are required to run the project
 - Setting the `FLASK_ENV` variable to `development` will detect file changes and restart the server automatically.
 
@@ -193,82 +209,14 @@ Setting the `FLASK_APP` variable to `flaskr` directs flask to use the `flaskr` d
 
 ```json5
 {
-  "created": 52,
-  "current_category": null,
-  "questions": [
-    {
-      "answer": "Apollo 13",
-      "category": 5,
-      "difficulty": 4,
-      "id": 2,
-      "question": "What movie earned Tom Hanks his third straight Oscar nomination, in 1996?"
-    },
-    {
-      "answer": "Kampala",
-      "category": 4,
-      "difficulty": 1,
-      "id": 3,
-      "question": "What is the capital of Uganda"
-    },
-    {
-      "answer": "Tom Cruise",
-      "category": 5,
-      "difficulty": 4,
-      "id": 4,
-      "question": "What actor did author Anne Rice first denounce, then praise in the role of her beloved Lestat?"
-    },
-    {
-      "answer": "Maya Angelou",
-      "category": 4,
-      "difficulty": 2,
-      "id": 5,
-      "question": "Whose autobiography is entitled 'I Know Why the Caged Bird Sings'?"
-    },
-    {
-      "answer": "Edward Scissorhands",
-      "category": 5,
-      "difficulty": 3,
-      "id": 6,
-      "question": "What was the title of the 1990 fantasy directed by Tim Burton about a young man with multi-bladed appendages?"
-    },
-    {
-      "answer": "Lagos",
-      "category": 4,
-      "difficulty": 1,
-      "id": 7,
-      "question": "What is the capital of Nigeria"
-    },
-    {
-      "answer": "Muhammad Ali",
-      "category": 4,
-      "difficulty": 1,
-      "id": 9,
-      "question": "What boxer's original name is Cassius Clay?"
-    },
-    {
-      "answer": "Brazil",
-      "category": 6,
-      "difficulty": 3,
-      "id": 10,
-      "question": "Which is the only team to play in every soccer World Cup tournament?"
-    },
-    {
-      "answer": "Uruguay",
-      "category": 6,
-      "difficulty": 4,
-      "id": 11,
-      "question": "Which country won the first ever soccer World Cup in 1930?"
-    },
-    {
-      "answer": "George Washington Carver",
-      "category": 4,
-      "difficulty": 2,
-      "id": 12,
-      "question": "Who invented Peanut Butter?"
-    }
-  ],
-  "success": true,
-  "total_questions": 21
+  "question_id": 57,
+  "questions": {
+    "answer": "dfrgfdgfd",
+    "category": 5,
+    "difficulty": 1,
+    "question": "Who is presrident of Tanzania"
+  },
+  "success": true
 }
 ```
 

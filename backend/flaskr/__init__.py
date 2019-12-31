@@ -120,7 +120,7 @@ def create_app(test_config=None):
         category = data.get('category', None)
         difficulty = data.get('difficulty', None)
         searchTerm = data.get('searchTerm', None)
-
+            
         try:
             if searchTerm:
                 questions = Question.query.order_by(Question.id).filter(
@@ -141,15 +141,10 @@ def create_app(test_config=None):
                     question=question, answer=answer, category=category, difficulty=difficulty)
                 question.insert()
 
-                questions = Question.query.order_by(Question.id).all()
-                current_quizzes = paginate_questions(request, questions)
-
                 return jsonify({
                     'success': True,
-                    'created': question.id,
-                    'questions': current_quizzes,
-                    'total_questions': Question.query.count(),
-                    'current_category': None
+                    'question_id': question.id,
+                    'questions': data,
                 }), 201
 
         except:
@@ -208,7 +203,7 @@ def create_app(test_config=None):
         return jsonify({
             'success': False,
             'Error': 400,
-            'message': 'bad request'
+            'message': 'Bad request'
         }), 400
 
     @app.errorhandler(404)
@@ -224,7 +219,7 @@ def create_app(test_config=None):
         return jsonify({
             'success': False,
             'Error': 422,
-            'message': 'Cannot be processed'
+            'message': 'Unable to process request'
         }), 422
 
     @app.errorhandler(405)
