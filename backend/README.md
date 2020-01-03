@@ -37,6 +37,7 @@ $ createdb trivia
 $ psql trivia < trivia.psql
 ```
 
+
 ## Running the server
 
 From within the `backend` directory first ensure you are working using your created virtual environment.
